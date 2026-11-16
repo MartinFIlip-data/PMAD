@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PMAD – precvičovanie testu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0d14; --bg2:#121521; --card:#161a28; --card2:#1c2133; --line:#262c42;
+  --text:#e8eaf3; --muted:#8b92ad; --acc:#7c6cff; --acc2:#4fd1c5;
+  --ok:#22c55e; --okbg:rgba(34,197,94,.12); --bad:#ef4444; --badbg:rgba(239,68,68,.12);
+  --warn:#f59e0b; --warnbg:rgba(245,158,11,.12);
+  --r:16px;
+}
+:root.light{
+  --bg:#f4f5fb; --bg2:#eceef7; --card:#ffffff; --card2:#f6f7fc; --line:#e1e4f0;
+  --text:#171a2b; --muted:#646b87; --okbg:rgba(34,197,94,.10); --badbg:rgba(239,68,68,.08); --warnbg:rgba(245,158,11,.12);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;
+  background-image:radial-gradient(1200px 600px at 10% -10%,rgba(124,108,255,.18),transparent 60%),radial-gradient(900px 500px at 110% 10%,rgba(79,209,197,.12),transparent 60%);
+  background-attachment:fixed}
+button{font-family:inherit;cursor:pointer}
+.wrap{max-width:1180px;margin:0 auto;padding:24px 20px 60px}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:grid;place-items:center;font-weight:800;color:#fff;font-size:15px;box-shadow:0 8px 24px rgba(124,108,255,.35)}
+.brand h1{font-size:19px;margin:0;font-weight:700}
+.brand p{margin:2px 0 0;color:var(--muted);font-size:13px}
+.hbtns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--text);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;transition:.15s;display:inline-flex;align-items:center;gap:8px}
+.btn:hover{border-color:var(--acc);transform:translateY(-1px)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn.primary{background:linear-gradient(135deg,var(--acc),#9a7bff);border-color:transparent;color:#fff;box-shadow:0 6px 18px rgba(124,108,255,.35)}
+.btn.ghost{background:transparent}
+.btn.warn{color:var(--warn);border-color:rgba(245,158,11,.4)}
+.btn.sm{padding:7px 12px;font-size:13px}
+
+.grid{display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:start}
+@media(max-width:900px){.grid{grid-template-columns:1fr}.side{order:-1}}
+
+.progress{height:8px;background:var(--bg2);border-radius:99px;overflow:hidden;margin-bottom:18px;border:1px solid var(--line)}
+.progress>div{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));width:0;transition:width .35s}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:28px;box-shadow:0 20px 50px rgba(0,0,0,.18)}
+.qmeta{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.pill{font-size:12px;font-weight:600;padding:5px 10px;border-radius:99px;background:var(--card2);border:1px solid var(--line);color:var(--muted)}
+.pill.acc{color:var(--acc);border-color:rgba(124,108,255,.4);background:rgba(124,108,255,.1)}
+.qtext{font-size:21px;line-height:1.45;font-weight:650;margin:0 0 22px}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;gap:14px;align-items:flex-start;padding:14px 16px;border:1.5px solid var(--line);border-radius:14px;background:var(--card2);cursor:pointer;transition:.15s;line-height:1.5;font-size:15.5px;user-select:none}
+.opt:hover{border-color:rgba(124,108,255,.6)}
+.opt .box{flex:0 0 auto;width:26px;height:26px;border-radius:8px;border:2px solid var(--line);display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--muted);margin-top:1px;transition:.15s}
+.opt.sel{border-color:var(--acc);background:rgba(124,108,255,.09)}
+.opt.sel .box{background:var(--acc);border-color:var(--acc);color:#fff}
+.opt.ok{border-color:var(--ok);background:var(--okbg)}
+.opt.ok .box{background:var(--ok);border-color:var(--ok);color:#fff}
+.opt.bad{border-color:var(--bad);background:var(--badbg)}
+.opt.bad .box{background:var(--bad);border-color:var(--bad);color:#fff}
+.opt.miss{border-color:var(--ok);border-style:dashed;background:var(--okbg)}
+.opt.miss .box{border-color:var(--ok);color:var(--ok)}
+.opt.locked{cursor:default}
+.opt .tag{margin-left:auto;font-size:12px;font-weight:700;white-space:nowrap;padding-left:10px}
+.opt.ok .tag{color:var(--ok)} .opt.bad .tag{color:var(--bad)} .opt.miss .tag{color:var(--ok)}
+
+.mrow{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:center;padding:14px;border:1.5px solid var(--line);border-radius:14px;background:var(--card2);margin-bottom:10px}
+@media(max-width:640px){.mrow{grid-template-columns:1fr}}
+.mrow .prompt{font-size:15px;line-height:1.5;font-weight:500}
+.mrow select{width:100%;padding:11px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--card);color:var(--text);font-family:inherit;font-size:14px}
+.mrow select:focus{outline:none;border-color:var(--acc)}
+.mrow.ok{border-color:var(--ok);background:var(--okbg)}
+.mrow.bad{border-color:var(--bad);background:var(--badbg)}
+.mrow .corr{grid-column:1/-1;font-size:13.5px;color:var(--ok);font-weight:600;display:none}
+.mrow.bad .corr,.mrow.shown .corr{display:block}
+
+.feedback{margin-top:18px;padding:14px 16px;border-radius:12px;font-weight:600;font-size:15px;display:none;align-items:center;gap:10px}
+.feedback.show{display:flex}
+.feedback.ok{background:var(--okbg);color:var(--ok);border:1px solid rgba(34,197,94,.35)}
+.feedback.bad{background:var(--badbg);color:var(--bad);border:1px solid rgba(239,68,68,.35)}
+.feedback.warn{background:var(--warnbg);color:var(--warn);border:1px solid rgba(245,158,11,.35)}
+.note{margin-top:12px;font-size:13px;color:var(--muted);font-style:italic}
+
+.actions{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap;align-items:center}
+.actions .sp{flex:1}
+.kbd{font-size:12px;color:var(--muted);margin-top:16px}
+.kbd b{display:inline-block;padding:1px 6px;border:1px solid var(--line);border-radius:6px;background:var(--card2);font-weight:600;margin:0 2px}
+
+.side .card{padding:20px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.stat{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+.stat b{display:block;font-size:20px}
+.stat span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:600}
+.stat.ok b{color:var(--ok)} .stat.bad b{color:var(--bad)}
+.side h3{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:4px 0 10px}
+.nav{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.nav button{aspect-ratio:1;border-radius:9px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-size:12.5px;font-weight:600;padding:0}
+.nav button.cur{outline:2px solid var(--acc);outline-offset:1px;color:var(--text)}
+.nav button.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.nav button.bad{background:var(--bad);border-color:var(--bad);color:#fff}
+.nav button.seen{background:var(--warnbg);border-color:rgba(245,158,11,.5);color:var(--warn)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.settings{margin-top:16px;border-top:1px solid var(--line);padding-top:14px;display:flex;flex-direction:column;gap:10px}
+.toggle{display:flex;align-items:center;justify-content:space-between;font-size:14px;gap:10px;cursor:pointer}
+.sw{position:relative;width:40px;height:22px;flex:0 0 auto}
+.sw input{opacity:0;width:0;height:0}
+.sw span{position:absolute;inset:0;background:var(--line);border-radius:99px;transition:.2s}
+.sw span:before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+.sw input:checked+span{background:var(--acc)}
+.sw input:checked+span:before{transform:translateX(18px)}
+
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(5,7,12,.65);backdrop-filter:blur(6px);display:none;place-items:center;z-index:50;padding:20px}
+.modal.show{display:grid}
+.modal .card{max-width:460px;width:100%;text-align:center}
+.big{font-size:56px;font-weight:800;background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent;margin:8px 0}
+.modal p{color:var(--muted)}
+.modal .actions{justify-content:center}
+.fade{animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo">AI</div>
+      <div><h1>PMAD – precvičovanie testu</h1><p id="sub">Neurónové siete, učenie a interpretácia modelov</p></div>
+    </div>
+    <div class="hbtns">
+      <button class="btn sm ghost" id="bWrong">↻ Len chybné</button>
+      <button class="btn sm ghost" id="bShuffle">🔀 Zamiešať</button>
+      <button class="btn sm ghost" id="bReset">⟲ Reset</button>
+      <button class="btn sm ghost" id="bTheme" title="Svetlý / tmavý režim">🌓 Režim</button>
+    </div>
+  </header>
+
+  <div class="progress"><div id="prog"></div></div>
+
+  <div class="grid">
+    <main>
+      <div class="card fade" id="qcard">
+        <div class="qmeta">
+          <span class="pill acc" id="qnum"></span>
+          <span class="pill" id="qtype"></span>
+          <span class="pill" id="qcount"></span>
+        </div>
+        <p class="qtext" id="qtext"></p>
+        <div id="body"></div>
+        <div class="feedback" id="fb"></div>
+        <div class="note" id="note"></div>
+        <div class="actions">
+          <button class="btn" id="bPrev">← Späť</button>
+          <button class="btn warn" id="bShow">👁 Ukázať odpoveď</button>
+          <span class="sp"></span>
+          <button class="btn primary" id="bCheck">Skontrolovať</button>
+          <button class="btn primary" id="bNext">Ďalej →</button>
+        </div>
+        <div class="kbd"><b>1</b>–<b>4</b> výber · <b>Enter</b> skontrolovať / ďalej · <b>←</b> <b>→</b> navigácia · <b>H</b> ukázať odpoveď</div>
+      </div>
+    </main>
+
+    <aside class="side">
+      <div class="card">
+        <div class="stats">
+          <div class="stat ok"><b id="sOk">0</b><span>Správne</span></div>
+          <div class="stat bad"><b id="sBad">0</b><span>Chybné</span></div>
+          <div class="stat"><b id="sLeft">0</b><span>Zostáva</span></div>
+        </div>
+        <h3>Otázky</h3>
+        <div class="nav" id="nav"></div>
+        <div class="legend">
+          <span><i style="background:var(--ok)"></i>správne</span>
+          <span><i style="background:var(--bad)"></i>chybne</span>
+          <span><i style="background:var(--warn)"></i>pozreté</span>
+        </div>
+        <div class="settings">
+          <label class="toggle">Ukázať počet správnych odpovedí<span class="sw"><input type="checkbox" id="tCount" checked><span></span></span></label>
+          <label class="toggle">Miešať poradie možností<span class="sw"><input type="checkbox" id="tOpts"><span></span></span></label>
+          <label class="toggle">Po správnej odpovedi rovno ďalej<span class="sw"><input type="checkbox" id="tAuto"><span></span></span></label>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="card">
+    <h2 style="margin:0">Hotovo! 🎉</h2>
+    <div class="big" id="mScore"></div>
+    <p id="mText"></p>
+    <div class="actions">
+      <button class="btn" id="mClose">Zavrieť</button>
+      <button class="btn" id="mWrong">Precvičiť chybné</button>
+      <button class="btn primary" id="mAgain">Znova od začiatku</button>
+    </div>
+  </div>
+</div>
+<script>
+const Q = [
+{t:"mc",q:"Čo platí v prípade, ak máme malý počet testovacích príkladov?",o:[
+["Môžeme spoľahlivo testovať aj zložitejšie modely.",0],
+["Zväčší sa možnosť preučenia.",0],
+["Zväčší sa variancia hodnôt chybovej funkcie na testovacích dátach.",1],
+["Zväčší sa variancia učenia.",0]]},
+{t:"mc",q:"Pre vstup 7x7x3 pixelov, veľkosť okna 3x3, posun 3,3, okraj 1,1 a počet filtrov 2, aký bude výstupný rozmer konvolučnej vrstvy?",o:[
+["7x7x2",0],["3x3x2",1],["6x6x2",0],["7x7x3",0]],hint:"(7 + 2·1 − 3) / 3 + 1 = 3 → 3x3x2"},
+{t:"mc",q:"Čo platí pre distribuovanú reprezentáciu slov?",o:[
+["Váhy vektora, ktoré reprezentuje dané slovo sú dané aktiváciou na skrytej vrstve.",1],
+["Ide o prediktívny model, kde sa na základe výskytu jedného slova snažíme predpovedať slová v jeho okolí.",1],
+["Váhy vektora, ktoré reprezentuje dané slovo sú na prepojeniach medzi vstupnou vrstvou a skrytou vrstvou.",1],
+["Váhy vektora, ktoré reprezentuje dané slovo binárne kódujú slová z jeho okolia.",0]]},
+{t:"mc",q:"Čo platí pre Partial Dependence Plot?",o:[
+["Na X-ovej osi je hodnota zvoleného vstupného atribútu a na Y-ovej osi je hodnota vysvetľovaného atribútu.",1],
+["Hodnota grafu pre danú hodnotu vysvetľovaného atribútu sa vypočíta spriemernením predikcií pre všetky kombinácie ostatných atribútov.",1],
+["Cieľom je zistiť závislosť medzi zmenami vstupných hodnôt vysvetľovaného atribútu a výslednou predikciou celého modelu.",1],
+["Cieľom je zistiť, ako sa menia vstupné atribúty pre danú hodnotu predikovaného atribútu.",0]]},
+{t:"mc",q:"Čo platí pre Leaky ReLU aktivačnú funkciu?",o:[
+["Potlačuje problémy s vymiznutím gradientu.",1],
+["Ide o lineárnu spojitú funkciu.",0],
+["Potlačuje problémy s explodovaním gradientu.",0],
+["Pre záporné hodnoty nadobúda malú nenulovú hodnotu.",1]]},
+{t:"mc",q:"Čo platí pre vizuálny pozornostný model pri automatickom titulkovaní obrazu?",o:[
+["Určuje v ktorej oblasti sa nachádza objekt a ako je ohraničený obdĺžnikovou oblasťou.",0],
+["Modifikuje predchádzajúci stav LSTM na základe vizuálnych informácií vo vstupnom obrázku.",1],
+["Rozdelí vstupný obrázok na oblasti a pre každú oblasť vypočíta váhu ako veľmi je daná oblasť dôležitá pre generovanie aktuálneho výstupu.",1],
+["Modifikuje nasledujúci stav LSTM na základe všetkých predchádzajúcich stavov.",0]]},
+{t:"mc",q:"Čo platí pre zovšeobecnenú chybu?",o:[
+["Nebudeme ju vedieť nikdy priamo vypočítať, iba nepriamo odhadnúť na trénovacích dátach.",0],
+["Pri učení je našim cieľom nájsť neznámu cieľovú funkciu, pre ktorú je zovšeobecnená chyba minimálna.",1],
+["Je zložená z chyby na testovacích a trénovacích dátach.",0],
+["Je zložená z chyby aproximácie a chyby variancie učenia.",1]]},
+{t:"match",q:"Priraďte nasledujúce optimalizačné metódy k jednotlivým tvrdeniam:",p:[
+["Vypočíta gradient v bode po priblížení v smere predchádzajúcej zmeny parametrov","Nesterov moment"],
+["Najčastejšie uviazne v lokálnom minime","Základná metóda gradientového zostupu"],
+["Kombinuje moment a adaptívnu zmenu rýchlosti učenia","Adam"],
+["Má dve nastavenia - rýchlosť učenia a tlmiaci faktor.","RMSprop"]],x:["Adagrad"]},
+{t:"mc",q:"Čo platí pre krížovú entropiu?",o:[
+["Slúži ako chybová funkcia pri klasifikácií, ktorá aproximuje 1/0 chybu.",1],
+["Pri učení hľadáme parametre, ktoré ju maximalizujú.",0],
+["Slúži na odhad pravdepodobnosti pre pozitívnu triedu pri klasifikácii do dvoch tried.",0],
+["Zodpovedá negatívnej hodnote logaritmu funkcie vierohodnosti.",1]]},
+{t:"mc",q:"Pre vstup 7x7x3 pixelov, veľkosť okna 3x3, posun 1,1, okraj 2,2 a počet filtrov 4, aký bude výstupný rozmer konvolučnej vrstvy?",o:[
+["7x7x3",0],["9x9x4",1],["11x11x4",0],["6x6x4",0]],hint:"(7 + 2·2 − 3) / 1 + 1 = 9 → 9x9x4"},
+{t:"mc",q:"Čo platí pre detekciu objektov pri spracovaní obrazu?",o:[
+["Cieľom je klasifikovať každý pixel vstupného obrázku do tried, podľa toho či patria objektu, alebo nie.",0],
+["Úlohou pozornostného manažmentu je priamo predikovať hranice obdĺžnikovej oblasti.",0],
+["Pri učení sa minimalizuje chyba zložená z chyby klasifikácie a chyby regresie pre rozmery a umiestnenie obdĺžnikovej oblasti.",1],
+["Úlohou pozornostného manažmentu je predikovať približné rozmery obdĺžnikovej oblasti a binárne klasifikovať, či sa v oblasti nachádza objekt.",1]]},
+{t:"mc",q:"Čo platí v prípade, ak sa bude zväčšovať počet trénovacích príkladov?",o:[
+["Budeme potrebovať zložitejší model, aby sme dosiahli minimálnu chybu pri učení.",1],
+["Mala by sa zmenšiť chyba aproximácie aj variancia učenia.",1],
+["Budeme potrebovať jednoduchší model.",0],
+["Zväčší sa pravdepodobnost preučenia, pretože algoritmus sa musí prispôsobiť väčšiemu počtu príkladov.",0]]},
+{t:"match",q:"Priraďte architektúry k jednotlivým úlohám:",p:[
+["LSTM a sekvenčný pozornostný mechanizmus ako kodér + LSTM ako dekodér.","Automatický preklad"],
+["LSTM a dekonvolučná sieť ako generátor + LSTM, konvolučná sieť a dopredná sieť ako diskriminátor.","Generovanie obrázkov podľa popisu"],
+["Konvolučná sieť + vizuálny pozornostný model + dopredná sieť pre klasifikáciu a regresiu.","Detekcia objektov v obraze"]],x:["Prenos štýlu z jedného obrázka na iný","Sémantické segmentovanie obrazu"]},
+{t:"match",q:"Priraďte tvrdenia k jednotlivým metódam interpretácie modelov:",p:[
+["Prototypy a kritické prípady","Generovanie reprezentatívnych príkladov, ktoré pokrývajú všetky trénovacie dáta."],
+["Alternatívne príklady","Generovanie príkladov, ktoré sú podobné vysvetľovanému príkladu, ale patria do inej požadovanej triedy."],
+["Najvplyvnejšie príklady","Detekcia trénovacích príkladov, ktoré spôsobujú najväčšiu zmenu predikcií, alebo v parametroch modelu."]],x:[]},
+{t:"mc",q:"Čo platí pre konvolučné neurónové siete?",o:[
+["Jednotlivé konvolučné filtre sa naučia rozpoznávať rôzne vizuálne vzory, ktoré sa hierarchicky kombinujú na jednotlivých vrstvách.",1],
+["Každý bod vstupnej vrstvy je úplne prepojený s každým filtrom.",0],
+["Počet číselných parametrov, ktoré je potrebné pri učení odhadnúť, je daný veľkosťou okna a posunom.",0],
+["Rozmery výstupu po konvolúcií sa môžu zmenšiť oproti vstupu podľa nastavenia posunu a okrajov.",1]]},
+{t:"match",q:"Priraďte architektúry k jednotlivým úlohám:",p:[
+["Konvolučná sieť ako kodér + dekonvolučná sieť a dopredná klasifikačná vrstva ako dekodér.","Sémantické segmentovanie obrazu"],
+["Dekonvolučná sieť ako generátor + konvolučná sieť a dopredná vrstva ako diskriminátor.","Generovanie obrazov"],
+["Konvolučná sieť a vizuálny pozornostný model ako kodér + LSTM ako dekodér.","Automatické titulkovanie obrazu"]],x:[]},
+{t:"mc",q:"Čo platí pre lokálne zástupné modely?",o:[
+["Pre rôzne vysvetľované príklady môžeme získať rôzne zástupné modely.",1],
+["Zástupný model a vysvetľovaný model sa učia na dátach s rovnakým cieľovým atribútom.",0],
+["Zástupný model sa učí na príkladoch, ktoré sú v okolí vysvetľovaného príkladu.",1],
+["Zástupný model nemusí byť interpretovateľný.",0]]},
+{t:"match",q:"Priraďte nasledujúce funkcie k jednotlivým úlohám:",p:[
+["Aktivačná funkcia na výstupnej vrstve pre binárnu klasifikáciu","Logistická funkcia"],
+["Aktivačná funkcia na výstupnej vrstve pre klasifikáciu do viacerých tried","Softmax funkcia"],
+["Chybová funkcia pre regresiu","Kvadratická chybová funkcia"],
+["Chybová funkcia pre klasifikáciu do viacerých tried","Krížová entropia"]],x:["1/0 chybová funkcia","Hyperbolický tangens"]},
+{t:"mc",q:"Čo platí pre RIDGE regresiu?",o:[
+["Je založená na regularizácii učenia ohraničením veľkosti parametrov.",1],
+["Aproximovane učíme model zložený zo všetkých podsietí.",0],
+["Penalizačná funkcia je euklidovská norma vektora váh.",1],
+["Uprednostňuje riedke riešenie.",0]]},
+{t:"mc",q:"Čo platí pre rekurentné siete LSTM (Long-Short Term Memory)?",o:[
+["LSTM boli špeciálne navrhnuté pre mapovanie sekvencií rôznych dĺžok.",0],
+["Stav sa aktualizuje pomocou hradiel – neurónov s aktivačnou logistickou funkciou.",1],
+["Skrytá vrstva uchováva stav, ktorý je závislý od vstupu na aktuálnej pozícii, predchádzajúceho stavu a hodnotách pamäte.",1],
+["Informácie v pamäti nie sú priamo nelineárne transformované, informácie sa modifikujú pomocou hradiel.",1]]},
+{t:"match",q:"Priraďte tvrdenia jednotlivým metódam interpretácie modelov:",p:[
+["Disekcia neurónových sietí","Snažíme sa zistiť, či sa vytvoria v modeli samostatné jednotky, ktoré reprezentujú daný objekt/koncept."],
+["Najvplyvnejšie príklady","Detekcia trénovacích príkladov, pri ktorých sa najviac zmení model, alebo jeho predikcia."],
+["Kontradiktórne príklady","Generovanie príkladov, ktorých cieľom je pomýliť daný model pri predikcii."]],x:[]},
+{t:"mc",q:"Čo platí pre LASSO regresiu?",o:[
+["Aproximovane učíme model zložený zo všetkých podsietí.",0],
+["Uprednostňuje riedke riešenie.",1],
+["Od chybovej funkcie sa odpočíta penalizačná funkcia.",0],
+["Ide o penalizačnú metódu regularizácie.",1]]},
+{t:"mc",q:"Čo platí pre ReLU aktivačnú funkciu?",o:[
+["Potlačuje problémy s vymiznutím gradientu.",1],
+["Pre záporné hodnoty nadobúda malú nenulovú hodnotu.",0],
+["Potlačuje problémy s explodovaním gradientu.",0],
+["Ide o nelineárnu po častiach spojitú funkciu.",1]]},
+{t:"mc",q:"Čo platí pre preučenie?",o:[
+["Vždy je možnosť preučenia, pretože sa snažíme aproximovať cieľovú funkciu iba na základe konečného počtu trénovacích príkladov.",1],
+["Vždy je možnosť preučenia, pretože každé reálne dáta obsahujú šum.",0],
+["K preučeniu dochádza vtedy, ak algoritmus zvolí funkciu s malou trénovacou chybou, ale veľkou chybou na nových príkladoch.",1],
+["K preučeniu dochádza vtedy, ak algoritmus vyberie funkciu s veľmi veľkou chybou na trénovacích dátach.",0]]},
+{t:"mc",q:"Čo platí pre LSTM rekurentné siete?",o:[
+["Pre mazanie pamäte má výstup neurónu hradla hodnotu blízku 1.",0],
+["LSTM boli špeciálne navrhnuté pre potlačenie problému vymiznutia gradientu.",0],
+["Pre zápis pamäte má výstup neurónu hradla hodnotu blízku 1.",1],
+["Hodnoty pamäte sú nelineárne transformované logistickou aktivačnou funkciou.",1]]},
+{t:"mc",q:"Čo platí pre základnú metódu gradientového zostupu?",o:[
+["Pri veľkej rýchlosti učenia môže dochádzať k osciláciám v okolí minima.",1],
+["V oblasti sedlového bodu dochádza k spomaleniu učenia.",1],
+["Pri každom kroku sa k parametrom pripočíta hodnota gradientu v danom bode.",0],
+["Vždy skonverguje od globálneho minima po konečnom počte krokov.",0]]},
+{t:"mc",q:"Čo platí pre základné GAN modely?",o:[
+["Ak diskriminátor správne klasifikuje vygenerovaný príklad, generátor sa aktualizuje ako pri chybnej klasifikácii.",1],
+["Výstup generátora je binárna klasifikácia pôvodný príklad/vygenerovaný.",0],
+["Výstup generátora má rovnaký rozmer ako pôvodné trénovacie dáta.",1],
+["Vstup do diskriminátora je náhodný.",0]]},
+{t:"match",q:"Priraďte jednotlivé tvrdenia k úlohám so sekvenciami:",p:[
+["Mapovanie sekvencia - sekvencia s rovnakými dĺžkami","Výstup sa vypočíta pre každú pozíciu vstupnej sekvencie doprednou sieťou, ktorá má na vstupe nasledujúci stav rekurentnej siete."],
+["Mapovanie sekvencia - sekvencia s nerovnakými dĺžkami","Posledný stav kodéra sa použije ako prvý stav dekodéra."],
+["Klasifikácia sekvencií","Posledný stav sa použije ako vstup do doprednej siete pre klasifikáciu."]],x:["Posledný stav kodéra sa použije pre všetky stavy dekodéra.","Výstup sa vypočíta pre každú pozíciu vstupnej sekvencie doprednou sieťou, ktorá má na vstupe predchádzajúci stav rekurentnej siete.","Posledný stav dekodéra sa použije ako prvý stav kodéra."]},
+{t:"mc",q:"Čo platí pre sémantické segmentovanie obrazu?",o:[
+["Pre zakódovanie obrazu slúži konvolučná sieť, ktorá postupne znižuje rozmer aktivačnej mapy.",1],
+["Pre dekódovanie obrazu slúži konvolučná sieť, ktorá postupne zvyšuje rozmer aktivačnej mapy.",0],
+["Vstupná a výstupná vrstva má rovnaký rozmer. Výstup klasifikuje každý pixel do tried.",1],
+["Výstup sú triedy objektov a poloha a veľkosť ohraničujúcej oblasti.",0]]},
+{t:"mc",q:"Čo platí pre základnú metódu gradientového zostupu?",o:[
+["V oblasti sedlového bodu dochádza k úplnému zastaveniu učenia.",0],
+["Pre konvexné funkcie vždy skonverguje do globálneho minima po konečnom počte krokov.",1],
+["Pri malej rýchlosti učenia môže dochádzať k osciláciám v okolí minima.",0],
+["Pri každom kroku sa k parametrom odpočíta hodnota gradientu v danom bode.",1]]},
+{t:"match",q:"Priraďte nasledujúce optimalizačné metódy k jednotlivým tvrdeniam:",p:[
+["Základná metóda gradientového zostupu","Najčastejšie uviazne v lokálnom minime"],
+["Adam","Kombinuje moment a adaptívnu zmenu rýchlosti učenia"],
+["Nesterov moment","Kvadraticky tlmí rýchlosť učenia podľa predchádzajúcich hodnôt gradientu"],
+["Adagrad","Má dve nastavenia - rýchlosť učenia a tlmiaci faktor"]],x:[],note:"Pozn.: odpovede pre Nesterov moment a Adagrad sú prevzaté presne z podkladov, hoci podľa teórie by skôr patrili inak (kvadratické tlmenie = Adagrad)."},
+{t:"mc",q:"Čo platí pre kontradiktórne príklady?",o:[
+["Kontradiktórne príklady sú zaradené do rovnakej triedy ako vysvetľované príklady.",0],
+["Pri generovaní kontradiktórnych príkladov meníme hodnoty pixelov vstupného obrázka tak, aby sme dosiahli chybovú klasifikáciu modelu.",1],
+["Cieľom je vygenerovať príklady, ktoré model pomýlia pri predikcii.",1],
+["Kontradiktórne príklady musia byť čo najpodobnejšie skutočným príkladom z danej triedy.",1]]},
+{t:"mc",q:"Čo platí pre pozornostné modely sekvenčných sietí?",o:[
+["Pozornostný model vypočíta pre každý stav kodéra váhu ktorá vyjadruje, ako je dôležitý stav na danej pozícií vstupnej sekvencie pre generovanie aktuálneho výstupu.",1],
+["Pozornostný model má na vstupe iba posledný stav kodéra a nasledujúci stav dekodéra.",0],
+["Pozornostný model pripočíta k predchádzajúcemu stavu dekodéra lineárnu kombináciu všetkých stavov kodéra.",1],
+["Váhy pozornostného modelu vyjadrujú, ako veľmi je výstup dekodéra závislý od každého jeho predchádzajúceho stavu.",0]]},
+{t:"match",q:"Priraďte nasledujúce funkcie k jednotlivým úlohám:",p:[
+["Logistická funkcia, Hyperbolický tangens","Nelineárna aktivačná funkcia pre skrytú vrstvu"],
+["Softmax funkcia","Výstupná aktivačná funkcia pre klasifikáciu do viacerých tried"],
+["Krížová entropia","Chybová funkcia pre klasifikáciu do viacerých tried"]],x:["Lineárna aktivačná funkcia pre skrytú vrstvu","Chybová funkcia pre regresiu"]},
+{t:"mc",q:"Čo platí pre zovšeobecnenú chybu?",o:[
+["Je zložená z chyby aproximácie a chyby variancie učenia.",1],
+["Nepriamo ju odhadujeme na nezávislej testovacej množine príkladov.",1],
+["Vieme ju vypočítať na testovacej množine príkladov.",0],
+["Je zložená z chyby na testovacích a trénovacích dátach.",0]]},
+{t:"mc",q:"Čo platí pre disekciu konvolučných sietí?",o:[
+["Porovnávame vstupný obrázok s obrázkom, ktorý vygeneruje sieť pomocou dekonvolučnej vrstvy.",0],
+["Snažíme sa zistiť, či sa v sieti vytvoria samostatné jednotky, ktoré reprezentujú daný objekt/koncept.",1],
+["Porovnávame aktiváciu daného filtra s maskou, ktorá na vstupnom obrázku označuje objekt/koncept.",1],
+["Každý pixel vstupných obrázkov musí byť klasifikovaný do jednej triedy.",0]]},
+{t:"mc",q:"Čo platí pre funkciu maximálnej vierohodnosti?",o:[
+["Pri učení hľadáme parametre, ktoré ju maximalizujú.",1],
+["Slúži ako náhrada chybovej funkcie pri učení regresných modelov.",0],
+["Slúži na odhad pravdepodobnosti pre pozitívnu triedu pri klasifikácií do dvoch tried.",0],
+["Slúži na odhad parametrov logistickej regresie.",1]]},
+{t:"mc",q:"Čo platí pre základnú metódu gradientového zostupu?",o:[
+["Vždy skonverguje do globálneho minima po konečnom počte krokov.",0],
+["Pri každom kroku sa k parametrom pripočíta hodnota gradientu v danom bode.",0],
+["V oblasti sedlového bodu dochádza k spomaleniu učenia.",1],
+["Pri veľkej rýchlosti učenia môže dochádzať k oscilácii v okolí minima.",1]]},
+{t:"mc",q:"Čo platí pre konštrukciu alternatívnych príkladov?",o:[
+["Alternatívny príklad má rovnakú hodnotu cieľového atribútu ako vysvetľovaný príklad.",0],
+["Pri učení sa minimalizuje vážená suma medzi rozdielom predikcie a vzdialenosťou medzi alternatívnym a vysvetľovacím príkladom.",1],
+["Vygenerovaný alternatívny príklad by mal byť čo najpodobnejší vysvetľovanému príkladu.",1],
+["Pri učení sa maximalizuje rozdiel medzi požadovanom hodnotou predikciu a predikciou modelu pre vysvetľovaný príklad.",0]]},
+{t:"mc",q:"Čo platí pre základné GAN modely?",o:[
+["Parametre diskriminátora sa učia aj pri vygenerovaných aj pri pôvodných trénovacích príkladoch.",1],
+["Cieľom diskriminátora je klasifikovať vstup do preddefinovaných tried určených pre pôvodné trénovacie príklady.",0],
+["Cieľom generátora je rozhodnúť, či bol vstupný príklad pôvodný, alebo vygenerovaný.",0],
+["Vstup do generátora je náhodný.",1]]},
+{t:"mc",q:"Čo v prípade, ak budeme mať nedostatočný počet trénovacích príkladov?",o:[
+["Nemôžeme spoľahlivo určiť presnosť modelu pre nové príklady.",0],
+["Zvýši sa možnosť preučenia.",1],
+["Mali by sme uprednostniť jednoduchší model.",1],
+["Zníži sa variancia učenia.",0]]},
+{t:"match",q:"Priraďte nasledujúce optimalizačné metódy k jednotlivým tvrdeniam:",p:[
+["Vypočíta gradient v bode po priblížení v smere predchádzajúcej zmeny parametrov","Nesterov moment"],
+["Kvadraticky tlmí rýchlosť učenia podľa predchádzajúcich hodnôt gradientu","Adagrad"],
+["Tlmenie rýchlosti učenia sa vypočíta ako kĺzavý priemer predchádzajúcich hodnôt gradientu","Adam"],
+["Váhy sa aktualizujú iba na základe gradientu v danom bode","Základná metóda gradientového zostupu"]],x:["RMSprop"],note:"Pozn.: podľa podkladov je pri „kĺzavom priemere“ správne Adam (RMSprop je tu ako zvyšná možnosť)."},
+{t:"mc",q:"Čo platí pre batch normalizáciu?",o:[
+["Priemerná hodnota a odchýlka pre normalizáciu sa vypočíta naraz pre všetky neuróny na danej vrstve.",0],
+["Normalizuje aktiváciu neurónov na danej vrstve tak, aby mali 0 priemernú hodnotu a 1 štandardnú odchýlku.",1],
+["Potlačuje problémy s vymiznutím gradientu.",0],
+["Priemerná hodnota a odchýlka pre normalizáciu sa vypočíta pre každý neurón na danej vrstve zvlášť.",1]]},
+{t:"mc",q:"Čo platí pre architektúru autoenkodéra?",o:[
+["Sieť sa učí tak, aby sme mali na skrytej vrstve tie isté hodnoty ako na vstupnej vrstve.",0],
+["Výstupná vrstva má rovnaký počet neurónov ako vstupná vrstva.",1],
+["Sieť sa učí tak, aby sme na výstupnej vrstve mali tie isté hodnoty ako na skrytej vrstve.",0],
+["Ide o klasifikačnú úlohu a pri učení potrebujeme mať príklady zatriedené do tried.",0]]},
+{t:"mc",q:"Čo platí pre lineárne interpretovateľné modely?",o:[
+["Absolútna hodnota váhy určuje dôležitosť atribútu pre predikciu.",1],
+["Dáta je vhodné normalizovať aby sa dali váhy navzájom porovnávať.",1],
+["Pre ohraničenie počtu atribútov použiť RIDGE regresiu.",0],
+["Váhy sa dajú štatisticky testovať, pričom ak je veľká pravdepodobnosť, že je váha nulová, atribút je dôležitý pre predikciu.",0]]},
+{t:"mc",q:"Čo platí pre jednotlivé vrstvy neurónovej siete?",o:[
+["Výstupná vrstva pri regresii lineárne kombinuje výstupy skrytej vrstvy.",1],
+["Neuróny na skrytej vrstve majú pre klasifikáciu priradenú softmax aktivačnú funkciu.",0],
+["Neuróny na vstupnej vrstve majú priradenú nelineárnu aktivačnú funkciu.",0],
+["Počet neurónov na skrytej vrstve je nastavenie, ktoré si musíme zvoliť.",1]]},
+{t:"mc",q:"Čo platí pre layer normalizáciu?",o:[
+["Priemerná hodnota a odchýlka pre normalizáciu sa vypočíta pre každý neurón na danej vrstve zvlášť.",0],
+["Potlačuje problémy s vymiznutím gradientu.",0],
+["Priemerná hodnota a odchýlka pre normalizáciu sa vypočíta naraz pre všetky neuróny na danej vrstve pre každý príklad v batch.",1],
+["Normalizuje aktiváciu neurónov na danej vrstve, aby mali 0 priemernú hodnotu a 1 štandardnú odchýlku.",1]]},
+{t:"mc",q:"Čo platí pre konvolučné neurónové siete?",o:[
+["Poolingové vrstvy sa naučia rozpoznávať rôzne vizuálne vzory, ktoré sa hierarchicky kombinujú na jednotlivých vrstvách.",0],
+["Každý bod vstupnej vrstvy je úplne prepojený s každým filtrom.",0],
+["Počet číselných parametrov, ktoré je potrebné pri učení odhadnúť, je daný veľkosťou okna a počtom filtrov.",1],
+["Rozmery výstupu po konvolúcii sa môžu zväčšiť oproti vstupu podľa nastavenia posunu a okrajov.",1]]},
+{t:"mc",q:"Čo platí pre jednotlivé vrstvy neurónovej siete?",o:[
+["Výstupná vrstva pri regresii nelineárne kombinuje výstupy skrytej vrstvy.",0],
+["Počet neurónov na výstupnej vrstve je nastavenie, ktoré si musíme zvoliť.",1],
+["Neuróny na skrytej vrstve majú priradenú nelineárnu aktivačnú funkciu.",1],
+["Neuróny na vstupnej vrstve zodpovedajú vstupným atribútom.",1]]}
+];
+
+const $=id=>document.getElementById(id);
+const KEY="pmad-quiz-v1";
+const store={get(){try{return JSON.parse(localStorage.getItem(KEY))}catch(e){return null}},set(v){try{localStorage.setItem(KEY,JSON.stringify(v))}catch(e){}}};
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+
+// state: order = array of question indices; res[qi] = 'ok'|'bad'|'seen'; ans[qi] = user answer
+let S=store.get()||{};
+if(!S.order||S.order.length===0||S.total!==Q.length){S={order:Q.map((_,i)=>i),pos:0,res:{},ans:{},total:Q.length}}
+S.opt=S.opt||{count:true,shuffle:false,auto:false};
+let checked=false, view=null; // view: per-question render info
+
+function save(){store.set(S)}
+function curQ(){return S.order[S.pos]}
+
+function render(){
+  const qi=curQ(), q=Q[qi];
+  checked=false;
+  const card=$("qcard"); card.classList.remove("fade"); void card.offsetWidth; card.classList.add("fade");
+  $("qnum").textContent=`Otázka ${S.pos+1} / ${S.order.length}`;
+  $("qtype").textContent=q.t==="mc"?"Výber odpovedí":"Priraďovanie";
+  const nc=q.t==="mc"?q.o.filter(o=>o[1]).length:q.p.length;
+  $("qcount").textContent=q.t==="mc"?(nc===1?"1 správna odpoveď":`${nc} správne odpovede`):`${nc} priradenia`;
+  $("qcount").style.display=S.opt.count?"":"none";
+  $("qtext").textContent=q.q;
+  $("fb").className="feedback"; $("fb").textContent="";
+  $("note").textContent=(q.hint?"Výpočet: "+q.hint+" ":"");
+  $("note").dataset.extra=q.note||"";
+  $("note").style.display="none";
+  const b=$("body"); b.innerHTML="";
+  if(q.t==="mc"){
+    let idx=q.o.map((_,i)=>i); if(S.opt.shuffle) idx=shuffle(idx);
+    view={idx,sel:new Set()};
+    idx.forEach((oi,k)=>{
+      const d=document.createElement("div"); d.className="opt"; d.dataset.oi=oi;
+      d.innerHTML=`<span class="box">${k+1}</span><span class="txt"></span><span class="tag"></span>`;
+      d.querySelector(".txt").textContent=q.o[oi][0];
+      d.onclick=()=>toggle(oi);
+      b.appendChild(d);
+    });
+  }else{
+    const choices=shuffle(q.p.map(p=>p[1]).concat(q.x||[]));
+    let rows=q.p.map((_,i)=>i); if(S.opt.shuffle) rows=shuffle(rows);
+    view={rows};
+    rows.forEach(ri=>{
+      const r=document.createElement("div"); r.className="mrow"; r.dataset.ri=ri;
+      const pr=document.createElement("div"); pr.className="prompt"; pr.textContent=q.p[ri][0];
+      const sel=document.createElement("select");
+      sel.innerHTML=`<option value="">— Vyber —</option>`+choices.map(c=>`<option></option>`).join("");
+      [...sel.options].slice(1).forEach((o,i)=>{o.value=choices[i];o.textContent=choices[i]});
+      const c=document.createElement("div"); c.className="corr"; c.textContent="✓ Správne: "+q.p[ri][1];
+      r.append(pr,sel,c); b.appendChild(r);
+    });
+  }
+  $("bPrev").disabled=S.pos===0;
+  $("bCheck").style.display=""; $("bNext").textContent=S.pos===S.order.length-1?"Dokončiť ✓":"Ďalej →";
+  renderSide();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function toggle(oi){
+  if(checked) return;
+  const s=view.sel; s.has(oi)?s.delete(oi):s.add(oi);
+  document.querySelectorAll(".opt").forEach(d=>d.classList.toggle("sel",s.has(+d.dataset.oi)));
+}
+
+function check(reveal){
+  if(checked) return;
+  const qi=curQ(), q=Q[qi]; let ok=true, any=false;
+  if(q.t==="mc"){
+    document.querySelectorAll(".opt").forEach(d=>{
+      const oi=+d.dataset.oi, corr=!!q.o[oi][1], sel=view.sel.has(oi); if(sel) any=true;
+      d.classList.add("locked"); d.classList.remove("sel");
+      const tag=d.querySelector(".tag");
+      if(corr&&sel){d.classList.add("ok");tag.textContent="✓ správne"}
+      else if(!corr&&sel){d.classList.add("bad");tag.textContent="✗ nesprávne";ok=false}
+      else if(corr&&!sel){d.classList.add(reveal?"ok":"miss");tag.textContent=reveal?"✓ správne":"✓ mal si označiť";ok=false}
+    });
+  }else{
+    document.querySelectorAll(".mrow").forEach(r=>{
+      const ri=+r.dataset.ri, sel=r.querySelector("select"); if(sel.value) any=true;
+      if(reveal&&!sel.value){sel.value=q.p[ri][1]; r.classList.add("shown","ok"); ok=false}
+      else if(sel.value===q.p[ri][1]) r.classList.add("ok");
+      else {r.classList.add("bad"); ok=false}
+      sel.disabled=true;
+    });
+  }
+  if(!reveal && !any){ checked=false; flash("Najprv vyber aspoň jednu odpoveď 🙂","warn");
+    document.querySelectorAll(".opt").forEach(d=>d.classList.remove("locked","ok","bad","miss"));
+    document.querySelectorAll(".opt .tag").forEach(t=>t.textContent="");
+    document.querySelectorAll(".mrow").forEach(r=>{r.classList.remove("ok","bad","shown");r.querySelector("select").disabled=false});
+    return; }
+  checked=true;
+  if(reveal){ if(S.res[qi]!=="ok"&&S.res[qi]!=="bad") S.res[qi]="seen"; flash("Správne odpovede sú zvýraznené zelenou.","warn"); }
+  else { S.res[qi]=ok?"ok":"bad"; flash(ok?"Výborne, správne! ✓":"Nie celkom – správne odpovede sú zvýraznené zelenou.",ok?"ok":"bad"); }
+  const n=$("note"); n.textContent=(n.textContent+" "+(n.dataset.extra||"")).trim(); n.style.display=n.textContent?"":"none";
+  $("bCheck").style.display="none";
+  save(); renderSide();
+  if(!reveal&&ok&&S.opt.auto) setTimeout(()=>{ if(checked) next() },900);
+}
+function flash(t,c){const f=$("fb");f.textContent=t;f.className="feedback show "+c}
+
+function next(){ if(S.pos<S.order.length-1){S.pos++;save();render()} else finish() }
+function prev(){ if(S.pos>0){S.pos--;save();render()} }
+function go(i){S.pos=i;save();render()}
+
+function renderSide(){
+  const nav=$("nav"); nav.innerHTML="";
+  let ok=0,bad=0;
+  S.order.forEach((qi,i)=>{
+    const r=S.res[qi]; if(r==="ok")ok++; if(r==="bad")bad++;
+    const b=document.createElement("button"); b.textContent=i+1;
+    b.className=(r||"")+(i===S.pos?" cur":""); b.onclick=()=>go(i); nav.appendChild(b);
+  });
+  const done=S.order.filter(qi=>S.res[qi]).length;
+  $("sOk").textContent=ok; $("sBad").textContent=bad; $("sLeft").textContent=S.order.length-done;
+  $("prog").style.width=(done/S.order.length*100)+"%";
+}
+
+function finish(){
+  const ok=S.order.filter(qi=>S.res[qi]==="ok").length;
+  $("mScore").textContent=Math.round(ok/S.order.length*100)+" %";
+  $("mText").textContent=`Správne ${ok} z ${S.order.length} otázok.`;
+  $("modal").classList.add("show");
+}
+
+function restart(order){ S.order=order; S.pos=0; order.forEach(qi=>{delete S.res[qi]}); save(); $("modal").classList.remove("show"); render() }
+function wrongOnly(){
+  const w=Q.map((_,i)=>i).filter(i=>S.res[i]==="bad"||S.res[i]==="seen");
+  if(!w.length){ flash("Nemáš žiadne chybné ani pozreté otázky 👏","ok"); return }
+  restart(shuffle(w));
+}
+
+$("bNext").onclick=next; $("bPrev").onclick=prev;
+$("bCheck").onclick=()=>check(false); $("bShow").onclick=()=>check(true);
+$("bShuffle").onclick=()=>restart(shuffle(Q.map((_,i)=>i)));
+$("bReset").onclick=()=>{S.res={};restart(Q.map((_,i)=>i))};
+$("bWrong").onclick=wrongOnly; $("mWrong").onclick=wrongOnly;
+$("mAgain").onclick=()=>{S.res={};restart(Q.map((_,i)=>i))};
+$("mClose").onclick=()=>$("modal").classList.remove("show");
+$("bTheme").onclick=()=>{document.documentElement.classList.toggle("light");S.light=document.documentElement.classList.contains("light");save()};
+[["tCount","count"],["tOpts","shuffle"],["tAuto","auto"]].forEach(([id,k])=>{const e=$(id);e.checked=!!S.opt[k];e.onchange=()=>{S.opt[k]=e.checked;save();if(k!=="auto"&&!checked)render()}});
+if(S.light) document.documentElement.classList.add("light");
+
+document.addEventListener("keydown",e=>{
+  if($("modal").classList.contains("show")) return;
+  if(e.target.tagName==="SELECT") { if(e.key==="Enter"){e.preventDefault(); checked?next():check(false)} return }
+  if(e.key==="ArrowRight") next();
+  else if(e.key==="ArrowLeft") prev();
+  else if(e.key==="Enter"){e.preventDefault(); checked?next():check(false)}
+  else if(e.key.toLowerCase()==="h") check(true);
+  else if(/^[1-9]$/.test(e.key)&&view&&view.idx){const oi=view.idx[+e.key-1]; if(oi!==undefined) toggle(oi)}
+});
+render();
+</script></body></html>
